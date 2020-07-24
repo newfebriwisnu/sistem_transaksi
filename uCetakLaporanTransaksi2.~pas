@@ -1,0 +1,31 @@
+unit uCetakLaporanTransaksi2;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, QRCtrls, jpeg, QuickRpt, ExtCtrls;
+
+type
+  TfrmCetakLaporanTransaksi2 = class(TForm)
+    QuickRep1: TQuickRep;
+    QRBand7: TQRBand;
+    QRImage2: TQRImage;
+    QRLabel20: TQRLabel;
+    QRLabel21: TQRLabel;
+    QRLabel22: TQRLabel;
+    QRLabel23: TQRLabel;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmCetakLaporanTransaksi2: TfrmCetakLaporanTransaksi2;
+
+implementation
+
+{$R *.dfm}
+
+end.

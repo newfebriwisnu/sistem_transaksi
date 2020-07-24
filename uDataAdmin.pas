@@ -1,0 +1,400 @@
+unit uDataAdmin;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, DB, Grids, DBGrids, StdCtrls, Buttons, Menus, jpeg, ExtCtrls;
+
+type
+  TfrmDataAdmin = class(TForm)
+    GroupBox1: TGroupBox;
+    DBGrid1: TDBGrid;
+    DataSource1: TDataSource;
+    Label1: TLabel;
+    Edit1: TEdit;
+    Button1: TButton;
+    PopupMenu1: TPopupMenu;
+    UbahData1: TMenuItem;
+    HapusData1: TMenuItem;
+    Refresh2: TMenuItem;
+    ambahData1: TMenuItem;
+    GroupBox2: TGroupBox;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    edtNama: TEdit;
+    edtUsername: TEdit;
+    edtPassword: TEdit;
+    cbbAkses: TComboBox;
+    edtId: TEdit;
+    Button2: TButton;
+    Button3: TButton;
+    SetONOFF1: TMenuItem;
+    ComboBox1: TComboBox;
+    procedure FormShow(Sender: TObject);
+    procedure Edit1Change(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure UbahData1Click(Sender: TObject);
+    procedure HapusData1Click(Sender: TObject);
+    procedure ambahData1Click(Sender: TObject);
+    procedure Refresh2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure cbbAksesKeyPress(Sender: TObject; var Key: Char);
+    procedure Edit1KeyPress(Sender: TObject; var Key: Char);
+    procedure SetONOFF1Click(Sender: TObject);
+    procedure ComboBox1KeyPress(Sender: TObject; var Key: Char);
+    procedure ComboBox1Change(Sender: TObject);
+    procedure edtNamaKeyPress(Sender: TObject; var Key: Char);
+    procedure edtUsernameKeyPress(Sender: TObject; var Key: Char);
+    procedure edtPasswordKeyPress(Sender: TObject; var Key: Char);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure DBGrid1KeyPress(Sender: TObject; var Key: Char);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    procedure TampilData;
+    procedure TampilDataJml;
+    procedure HapusData;
+    procedure InputData;
+    procedure UbahData;
+    procedure setOnOff;
+  end;
+
+var
+  frmDataAdmin: TfrmDataAdmin;
+
+implementation
+
+uses uMainForm, uDM, uInputAdmin, DateUtils;
+
+{$R *.dfm}
+
+procedure TfrmDataAdmin.InputData;
+begin
+  with dm.qry2 do
+    begin
+      Active:=False;
+      Close;
+      SQL.Clear;
+      SQL.Text:='sp_insertAdmin '+
+                ''+QuotedStr(edtNama.Text)+','+QuotedStr(edtUsername.Text)+','+
+                ''+QuotedStr(edtPassword.Text)+','+QuotedStr(cbbAkses.Text)+'';
+      ExecSQL;
+    end;
+end;
+
+procedure TfrmDataAdmin.UbahData;
+begin
+with dm.qry2 do
+    begin
+      Active:=False;
+      Close;
+      SQL.Clear;
+      SQL.Text:='sp_updateAdmin '+
+                ''+edtId.Text+','+QuotedStr(edtNama.Text)+','+
+                ''+QuotedStr(edtUsername.Text)+','+QuotedStr(edtPassword.Text)+','+
+                ''+QuotedStr(cbbAkses.Text)+'';
+      ExecSQL;
+    end;
+end;
+
+procedure TfrmDataAdmin.setOnOff;
+begin
+  with dm.qry2 do
+    begin
+      Active:=False;
+      Close;
+      SQL.Clear;
+      SQL.Text:='sp_setStatusAdmin '+DBGrid1.Fields[0].AsString+'';
+      ExecSQL;
+    end;
+end;
+
+procedure TfrmDataAdmin.TampilData;
+begin
+  with dm.qry1 do
+  begin
+    Active:=False;
+    Close;
+    SQL.Clear;
+    SQL.Text:='SELECT * FROM view_Admin ORDER BY id_admin ASC';
+    Active:=True;
+    ExecSQL;
+  end;
+end;
+
+procedure TfrmDataAdmin.TampilDataJml;
+begin
+with dm.qry1 do
+  begin
+    Active:=False;
+    Close;
+    SQL.Clear;
+    SQL.Text:='SELECT TOP '+ComboBox1.Text+' * FROM view_Admin ORDER BY id_admin ASC';
+    Active:=True;
+    ExecSQL;
+  end;
+end;
+
+procedure TfrmDataAdmin.HapusData;
+begin
+with dm.qry2 do
+  begin
+    Active:=False;
+    Close;
+    SQL.Clear;
+    SQL.Text:='sp_deleteAdmin '+QuotedStr(DBGrid1.Fields[0].AsString)+'';
+    ExecSQL;
+    ShowMessage('Data Berhasil Dihapus');
+  end;
+end;
+
+procedure TfrmDataAdmin.FormShow(Sender: TObject);
+begin
+TampilData;
+
+edtId.Enabled:=False; edtId.Visible:=False;
+edtId.Text:='';
+edtNama.Text:='';
+edtUsername.Text:='';
+edtPassword.Text:='';
+cbbAkses.Text:='Pilih Akses';
+Edit1.SetFocus;
+ComboBox1.Text:='25';
+
+Button2.Caption:='Simpan';
+GroupBox2.Caption:='Kelola Data Admin';
+GroupBox2.Enabled:=False;
+end;
+
+procedure TfrmDataAdmin.Edit1Change(Sender: TObject);
+begin
+with dm.qry1 do
+  begin
+    Active:=False;
+    Close;
+    SQL.Clear;
+    SQL.Text:='SELECT * FROM view_Admin WHERE '+
+              ' nama LIKE''%'+Edit1.Text+'%'' OR'+
+              ' username LIKE''%'+Edit1.Text+'%''';
+    Active:=True;
+    ExecSQL;
+  end;
+end;
+
+procedure TfrmDataAdmin.Button1Click(Sender: TObject);
+begin
+FormShow(Sender);
+end;
+
+procedure TfrmDataAdmin.UbahData1Click(Sender: TObject);
+begin
+  if dm.qry1.RecordCount=0 then
+  begin
+    ShowMessage('Data Tidak Ada');
+  end
+  else
+  begin
+    GroupBox2.Enabled:=True;
+    GroupBox2.Caption:='Ubah Data Admin';
+    Button2.Caption:='Ubah';
+
+    edtNama.Text:=dm.qry1['nama'];
+    edtUsername.Text:=dm.qry1['username'];
+    edtPassword.Text:=dm.qry1['password'];
+    cbbAkses.Text:=dm.qry1['akses'];
+    edtId.Text:=dm.qry1['id_admin'];
+    edtNama.SetFocus;
+  end;
+end;
+
+procedure TfrmDataAdmin.HapusData1Click(Sender: TObject);
+begin
+  if dm.qry1.RecordCount=0 then
+    begin
+      ShowMessage('Data Tidak Ada');
+    end
+  else
+    begin
+      if(Application.MessageBox('Hapus Data?','PESAN',MB_YESNO+MB_ICONWARNING)=ID_YES) then
+        begin
+          try
+            HapusData;
+            FormShow(Sender);
+          except
+            ShowMessage('Data Gagal Dihapus');
+        end;
+    end
+  else
+    begin
+
+    end;
+  end;
+end;
+
+procedure TfrmDataAdmin.ambahData1Click(Sender: TObject);
+begin
+FormShow(Sender);
+GroupBox2.Enabled:=True;
+GroupBox2.Caption:='Tambah Data Admin';
+Button2.Caption:='Simpan';
+edtNama.SetFocus;
+end;
+
+procedure TfrmDataAdmin.Refresh2Click(Sender: TObject);
+begin
+FormShow(Sender);
+end;
+
+procedure TfrmDataAdmin.Button3Click(Sender: TObject);
+begin
+FormShow(Sender);
+end;
+
+procedure TfrmDataAdmin.Button2Click(Sender: TObject);
+begin
+  if (edtNama.Text='') or (edtUsername.Text='') or (edtPassword.Text='') or (edtPassword.Text='') or (cbbAkses.Text='Pilih Akses') then
+    begin
+      ShowMessage('Silahkan isi data yang masih kosong');
+    end
+  else
+  begin
+    if (Button2.Caption='Simpan') then
+    begin
+      if(Application.MessageBox('Simpan Data?','PESAN',MB_YESNO+MB_ICONWARNING)=ID_YES) then
+        begin
+          try dm.con1.BeginTrans;
+            InputData;
+            dm.con1.CommitTrans;
+            FormShow(Sender);
+            ShowMessage('Data Tersimpan');
+          except dm.con1.RollbackTrans;
+            FormShow(Sender);
+            ShowMessage('Gagal Tersimpan');
+          end;
+        end
+      else
+        begin
+
+        end;
+    end
+    else if (Button2.Caption='Ubah') then
+    begin
+      if(Application.MessageBox('Ubah Data?','PESAN',MB_YESNO+MB_ICONWARNING)=ID_YES) then
+        begin
+          try dm.con1.BeginTrans;
+            UbahData;
+            dm.con1.CommitTrans;
+            FormShow(Sender);
+            ShowMessage('Data Tersimpan');
+          except dm.con1.RollbackTrans;
+            FormShow(Sender);
+            ShowMessage('Gagal Tersimpan');
+          end;
+        end
+      else
+        begin
+          
+        end;
+    end
+    else
+    begin
+      FormShow(Sender);
+    end;
+  end;
+end;
+
+procedure TfrmDataAdmin.cbbAksesKeyPress(Sender: TObject; var Key: Char);
+begin
+Key:=#0;
+end;
+
+procedure TfrmDataAdmin.Edit1KeyPress(Sender: TObject; var Key: Char);
+begin
+if Key=#39 then
+  Key:=#0;
+
+if Key=#27 then
+  Close;
+end;
+
+procedure TfrmDataAdmin.SetONOFF1Click(Sender: TObject);
+begin
+  if dm.qry1.RecordCount=0 then
+    begin
+      ShowMessage('Data Tidak Ada');
+    end
+  else
+    begin
+      if(Application.MessageBox('Set Admin ON/OFF?','PESAN',MB_YESNO+MB_ICONWARNING)=ID_YES) then
+        begin
+          try dm.con1.BeginTrans;
+            setOnOff;
+            dm.con1.CommitTrans;
+            FormShow(Sender);
+            ShowMessage('Data Tersimpan');
+          except dm.con1.RollbackTrans;
+            FormShow(Sender);
+            ShowMessage('Gagal Tersimpan');
+          end;
+        end
+      else
+        begin
+
+        end;
+    end;
+end;
+
+procedure TfrmDataAdmin.ComboBox1KeyPress(Sender: TObject; var Key: Char);
+begin
+Key:=#0;
+end;
+
+procedure TfrmDataAdmin.ComboBox1Change(Sender: TObject);
+begin
+TampilDataJml;
+end;
+
+procedure TfrmDataAdmin.edtNamaKeyPress(Sender: TObject; var Key: Char);
+begin
+if not (key in['a'..'z','A'..'Z','0'..'9',#8,#13,#32]) then
+  begin
+    key:=#0;
+  end;
+end;
+
+procedure TfrmDataAdmin.edtUsernameKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+if not (key in['a'..'z','A'..'Z','0'..'9',#8,#13,#32]) then
+  begin
+    key:=#0;
+  end;
+end;
+
+procedure TfrmDataAdmin.edtPasswordKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+if not (key in['a'..'z','A'..'Z','0'..'9',#8,#13,#32]) then
+  begin
+    key:=#0;
+  end;
+end;
+
+procedure TfrmDataAdmin.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+//MainForm.Enabled:=True;
+end;
+
+procedure TfrmDataAdmin.DBGrid1KeyPress(Sender: TObject; var Key: Char);
+begin
+if Key=#27 then
+  Close;
+end;
+
+end.

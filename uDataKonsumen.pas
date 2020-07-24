@@ -1,0 +1,143 @@
+unit uDataKonsumen;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Grids, DBGrids, DB, Menus;
+
+type
+  TfrmDataKonsumen = class(TForm)
+    GroupBox1: TGroupBox;
+    Label1: TLabel;
+    DBGrid1: TDBGrid;
+    Edit1: TEdit;
+    Button1: TButton;
+    DataSource1: TDataSource;
+    PopupMenu1: TPopupMenu;
+    Refresh1: TMenuItem;
+    ComboBox1: TComboBox;
+    procedure FormShow(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure Edit1KeyPress(Sender: TObject; var Key: Char);
+    procedure Refresh1Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure ComboBox1KeyPress(Sender: TObject; var Key: Char);
+    procedure ComboBox1Change(Sender: TObject);
+    procedure Edit1Change(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure DBGrid1KeyPress(Sender: TObject; var Key: Char);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    procedure TampilData;
+    procedure TampilDataJml;
+  end;
+
+var
+  frmDataKonsumen: TfrmDataKonsumen;
+
+implementation
+
+uses uDM, uMainForm;
+
+{$R *.dfm}
+
+procedure TfrmDataKonsumen.TampilData;
+begin
+  with dm.qry1 do
+  begin
+    Active:=False;
+    Close;
+    SQL.Clear;
+    SQL.Text:='SELECT * FROM view_Konsumen ORDER BY id_konsumen DESC';
+    Active:=True;
+    ExecSQL;
+  end;
+end;
+
+procedure TfrmDataKonsumen.TampilDataJml;
+begin
+with dm.qry1 do
+  begin
+    Active:=False;
+    Close;
+    SQL.Clear;
+    SQL.Text:='SELECT TOP '+ComboBox1.Text+' * FROM view_Konsumen ORDER BY id_konsumen DESC';
+    Active:=True;
+    ExecSQL;
+  end;
+end;
+
+procedure TfrmDataKonsumen.FormShow(Sender: TObject);
+begin
+ComboBox1.Text:='25';
+Edit1.SetFocus;
+TampilData;
+end;
+
+procedure TfrmDataKonsumen.Button1Click(Sender: TObject);
+begin
+FormShow(Sender);
+end;
+
+procedure TfrmDataKonsumen.Edit1KeyPress(Sender: TObject; var Key: Char);
+begin
+if Key=#39 then
+  Key:=#0;
+
+if Key=#27 then
+  Close;
+end;
+
+procedure TfrmDataKonsumen.Refresh1Click(Sender: TObject);
+begin
+FormShow(Sender);
+end;
+
+procedure TfrmDataKonsumen.Button3Click(Sender: TObject);
+begin
+FormShow(Sender);
+end;
+
+procedure TfrmDataKonsumen.ComboBox1KeyPress(Sender: TObject;
+  var Key: Char);
+begin
+Key:=#0;
+end;
+
+procedure TfrmDataKonsumen.ComboBox1Change(Sender: TObject);
+begin
+TampilDataJml;
+end;
+
+procedure TfrmDataKonsumen.Edit1Change(Sender: TObject);
+begin
+with dm.qry1 do
+  begin
+    Active:=False;
+    Close;
+    SQL.Clear;
+    SQL.Text:='SELECT * FROM view_Konsumen WHERE '+
+              ' id_konsumen LIKE''%'+Edit1.Text+'%'' OR'+
+              ' nama LIKE''%'+Edit1.Text+'%'' OR'+
+              ' member LIKE''%'+Edit1.Text+'%''';
+    Active:=True;
+    ExecSQL;
+  end;
+end;
+
+procedure TfrmDataKonsumen.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+//MainForm.Enabled:=True;
+end;
+
+procedure TfrmDataKonsumen.DBGrid1KeyPress(Sender: TObject; var Key: Char);
+begin
+if Key=#27 then
+  Close;
+end;
+
+end.
